@@ -109,3 +109,27 @@ class AnalyticsLogicTests(TestCase):
         df.loc[0, 'conversion_rate'] = 50.0
         df = add_insights(df)
         self.assertEqual(df.iloc[0]['headline_insight'], 'Strong Completion')
+
+    def test_max_attendance_ignores_invalid(self):
+        df = pd.DataFrame([{
+            'is_valid': True,
+            'feedback_tier': 'High Confidence',
+            'attendance': 50,
+            'conversion_rate': 100.0,
+            'completion_rate': 100.0,
+            'feedback_rating': 5.0
+        }, {
+            'is_valid': False,
+            'feedback_tier': 'High Confidence',
+            'attendance': 1000, # A very large attendance that should be ignored
+            'conversion_rate': 100.0,
+            'completion_rate': 100.0,
+            'feedback_rating': 5.0
+        }])
+        df = add_score(df)
+        
+        # Valid event should be normalized against its own attendance (max=50), so att_norm = 1.0
+        # participation_score = (1.0 + 1.0)/2 = 1.0
+        # final_score = (1.0 + 1.0 + 1.0)/3 * 100 = 100.0
+        self.assertAlmostEqual(df.iloc[0]['score'], 100.0)
+        self.assertTrue(pd.isna(df.iloc[1]['score']))

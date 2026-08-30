@@ -75,8 +75,8 @@ def add_score(df):
         return df
         
     # Normalize components 0-1
-    max_att = df['attendance'].max()
-    att_norm = df['attendance'] / max_att if max_att and max_att > 0 else 0
+    max_att = df.loc[df['is_valid'], 'attendance'].max() if 'is_valid' in df.columns else df['attendance'].max()
+    att_norm = df['attendance'] / max_att if pd.notna(max_att) and max_att > 0 else 0
     
     conv_norm = df['conversion_rate'] / 100
     comp_norm = df['completion_rate'] / 100
@@ -168,7 +168,7 @@ def add_insights(df):
     return df
 
 def make_charts(df):
-    img_dir = os.path.join(settings.BASE_DIR, 'events', 'static', 'events', 'img')
+    img_dir = settings.MEDIA_ROOT
     os.makedirs(img_dir, exist_ok=True)
     
     chart_paths = {}
@@ -188,7 +188,7 @@ def make_charts(df):
     plt.tight_layout()
     plt.savefig(path_dept)
     plt.close()
-    chart_paths['dept_participation'] = 'events/img/dept_participation.png'
+    chart_paths['dept_participation'] = 'dept_participation.png'
     
     # 2. Conversion rate sorted bar chart (grouped by event type for readability)
     type_conv = df.groupby('event_type')['conversion_rate'].mean().sort_values(ascending=False).reset_index()
@@ -203,7 +203,7 @@ def make_charts(df):
     plt.tight_layout()
     plt.savefig(path_conv)
     plt.close()
-    chart_paths['conversion_rates'] = 'events/img/conversion_rates.png'
+    chart_paths['conversion_rates'] = 'conversion_rates.png'
     
     # 3. Quality-vs-reach scatter
     plt.figure(figsize=(8, 5))
@@ -224,7 +224,7 @@ def make_charts(df):
     plt.tight_layout()
     plt.savefig(path_scatter)
     plt.close()
-    chart_paths['quality_vs_reach'] = 'events/img/quality_vs_reach.png'
+    chart_paths['quality_vs_reach'] = 'quality_vs_reach.png'
     
     return chart_paths
 

@@ -58,6 +58,13 @@ class Command(BaseCommand):
             registrations=10, attendance=0, completion=0, feedback_rating=None, feedback_responses=0
         ))
 
+        # 7. Deliberately Invalid Event (attendance > registrations) for Data Quality Warnings testing
+        events.append(Event(
+            name="Invalid Data Event", event_type=Event.EventType.WORKSHOP, department=Event.Department.CS,
+            academic_year=Event.AcademicYear.YEAR_2024_2025, event_date=base_date + timedelta(days=6), status=Event.Status.COMPLETED,
+            registrations=20, attendance=50, completion=10, feedback_rating=4.0, feedback_responses=10
+        ))
+
         # Random Seed for reproducibility
         random.seed(42)
 
@@ -85,7 +92,10 @@ class Command(BaseCommand):
             ))
 
         for event in events:
-            event.clean()
+            try:
+                event.clean()
+            except Exception:
+                pass # deliberately ignore so we can save invalid records
             event.save()
             
         self.stdout.write(self.style.SUCCESS(f'Successfully generated 30 synthetic events.'))
