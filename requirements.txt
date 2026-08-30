@@ -1,7 +1,7 @@
 asgiref
 contourpy
 cycler
-Django==6.1
+Django
 fonttools
 kiwisolver
 matplotlib
