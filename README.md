@@ -61,8 +61,23 @@ python manage.py generate_synthetic_data   # loads 30 sample events
 python manage.py createsuperuser           # optional, for /admin access
 python manage.py runserver
 ```
- 
+
 Visit `http://127.0.0.1:8000/` for the dashboard and `http://127.0.0.1:8000/admin/` to manage event records.
+
+### Local Network (LAN) Testing
+
+If you want to test the app on your phone, tablet, or another computer on the same Wi-Fi network:
+
+1. Ensure your host machine's firewall allows inbound connections on port `8000`.
+   - **Windows (PowerShell as Admin):** `New-NetFirewallRule -DisplayName "Django LAN" -Direction Inbound -LocalPort 8000 -Protocol TCP -Action Allow`
+   - **macOS:** System Settings > Network > Firewall > Options > "Automatically allow built-in software to receive incoming connections" (or explicitly add python).
+   - **Linux (ufw):** `sudo ufw allow 8000/tcp`
+2. Run the LAN helper script from your terminal:
+   ```bash
+   python run_lan.py
+   ```
+3. The script will print the exact URL (e.g., `http://192.168.1.5:8000`) and display a QR code to easily open the app on your phone.
+4. *(Optional)* If you submit forms from another device (like logging into the admin panel), ensure you set `CSRF_TRUSTED_ORIGINS=http://192.168.x.x:8000` in your environment to prevent CSRF errors.
  
 ### Running Tests
  

@@ -27,11 +27,15 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-royb995_+wlt0w&ybw5up
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
+# ALLOWED_HOSTS uses ['*'] in DEBUG mode to allow testing on local network IPs (e.g. 192.168.x.x).
+# SECURITY WARNING: This must be properly restricted in production.
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',') if not DEBUG else ['*']
 if '.vercel.app' not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append('.vercel.app')
 
-
+# CSRF trusted origins for cross-device forms
+csrf_origins = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = csrf_origins.split(',') if csrf_origins else []
 # Application definition
 
 INSTALLED_APPS = [
