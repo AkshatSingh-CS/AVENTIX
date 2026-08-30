@@ -17,3 +17,5 @@ tzdata==2026.3
 
 gunicorn
 whitenoise
+psycopg[binary]
+dj-database-url

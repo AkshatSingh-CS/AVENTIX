@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+import io
+import base64
 from django.conf import settings
 from .models import Event
 import matplotlib
@@ -168,12 +170,18 @@ def add_insights(df):
     return df
 
 def make_charts(df):
-    img_dir = settings.MEDIA_ROOT
-    os.makedirs(img_dir, exist_ok=True)
-    
     chart_paths = {}
     if df.empty:
         return chart_paths
+        
+    def get_base64_image():
+        buf = io.BytesIO()
+        plt.tight_layout()
+        plt.savefig(buf, format='png')
+        plt.close()
+        buf.seek(0)
+        image_base64 = base64.b64encode(buf.read()).decode('utf-8')
+        return f"data:image/png;base64,{image_base64}"
 
     # 1. Department participation bar chart
     dept_df = df.groupby('department')['attendance'].sum().reset_index()
@@ -184,11 +192,7 @@ def make_charts(df):
     plt.ylabel('Total Attendance')
     if df['low_reliability_tag'].any():
         plt.figtext(0.99, 0.01, '* Note: Some data points represent low-reliability feedback', ha='right', fontsize=8, color='red')
-    path_dept = os.path.join(img_dir, 'dept_participation.png')
-    plt.tight_layout()
-    plt.savefig(path_dept)
-    plt.close()
-    chart_paths['dept_participation'] = 'dept_participation.png'
+    chart_paths['dept_participation'] = get_base64_image()
     
     # 2. Conversion rate sorted bar chart (grouped by event type for readability)
     type_conv = df.groupby('event_type')['conversion_rate'].mean().sort_values(ascending=False).reset_index()
@@ -199,11 +203,7 @@ def make_charts(df):
     plt.ylabel('Conversion Rate (%)')
     if df['low_reliability_tag'].any():
         plt.figtext(0.99, 0.01, '* Note: Some data points represent low-reliability feedback', ha='right', fontsize=8, color='red')
-    path_conv = os.path.join(img_dir, 'conversion_rates.png')
-    plt.tight_layout()
-    plt.savefig(path_conv)
-    plt.close()
-    chart_paths['conversion_rates'] = 'conversion_rates.png'
+    chart_paths['conversion_rates'] = get_base64_image()
     
     # 3. Quality-vs-reach scatter
     plt.figure(figsize=(8, 5))
@@ -220,11 +220,7 @@ def make_charts(df):
     if df['low_reliability_tag'].any():
         plt.figtext(0.99, 0.01, '* Red "x" markers represent low-reliability feedback', ha='right', fontsize=8, color='red')
     
-    path_scatter = os.path.join(img_dir, 'quality_vs_reach.png')
-    plt.tight_layout()
-    plt.savefig(path_scatter)
-    plt.close()
-    chart_paths['quality_vs_reach'] = 'quality_vs_reach.png'
+    chart_paths['quality_vs_reach'] = get_base64_image()
     
     return chart_paths
 

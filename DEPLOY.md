@@ -104,3 +104,26 @@ Only use this method if you are fine with data resetting constantly (e.g., you w
    python manage.py generate_synthetic_data
    ```
    *(Note: You will need to repeat step 7 every time the server restarts on the free tier).*
+
+---
+
+## Serverless Deployment: Vercel
+
+Vercel runs Django as a stateless serverless function. Because of the ephemeral filesystem, we have configured the app to use a remote PostgreSQL database and generate charts as in-memory base64 strings rather than saving them to disk. 
+
+### Instructions
+
+1. **Connect GitHub**: Log into the [Vercel Dashboard](https://vercel.com/) and click **Add New** -> **Project**. Select your GitHub repository.
+2. **Configure Database**: Before clicking deploy, go to the **Storage** tab in your Vercel project and add a Postgres (Neon) integration. This will automatically inject a `DATABASE_URL` environment variable into your project.
+3. **Environment Variables**: Add the following to your project's Environment Variables:
+   - `SECRET_KEY`: (generate a secure random string)
+   - `DEBUG`: `False`
+   *(Vercel automatically sets the `.vercel.app` domain in `ALLOWED_HOSTS` for you).*
+4. **Deploy**: Trigger the deployment.
+5. **Initialize Database (Stateless)**: Because the Vercel function is stateless, you should not run management commands directly on the serverless function. Instead, run them from your local machine connected to the remote database:
+   - Open a terminal in your local project directory.
+   - Run `vercel env pull` to download the `DATABASE_URL` to your local `.env` file.
+   - Run migrations against the remote DB: `python manage.py migrate`
+   - Generate initial data: `python manage.py generate_synthetic_data`
+
+Your Vercel app will now display the data!
