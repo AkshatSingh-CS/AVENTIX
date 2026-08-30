@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AVENTIX - Event Analytics Dashboard</title>
+    <meta name="description" content="AVENTIX descriptive event analytics dashboard for university performance tracking.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'events/css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 id="main-title">AVENTIX</h1>
+            <p class="subtitle">Descriptive Event Analytics Dashboard</p>
+        </header>
+
+        <!-- 1. Overview (KPIs) -->
+        <section id="overview">
+            <h2>Overview</h2>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Events</div>
+                    <div class="kpi-value">{{ kpis.total_events }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Registrations</div>
+                    <div class="kpi-value">{{ kpis.total_registrations }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Attendance</div>
+                    <div class="kpi-value">{{ kpis.total_attendance }}</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Conversion Rate</div>
+                    <div class="kpi-value">{{ kpis.overall_conversion }}%</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Avg Feedback</div>
+                    <div class="kpi-value">{{ kpis.average_feedback }} / 5</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Participation (charts) -->
+        <section id="participation">
+            <h2>Participation</h2>
+            <div class="chart-grid">
+                {% if chart_paths.dept_participation %}
+                <div class="chart-card">
+                    <h3>Department Reach</h3>
+                    <img src="{% static chart_paths.dept_participation %}" alt="Department participation bar chart">
+                </div>
+                {% endif %}
+                {% if chart_paths.conversion_rates %}
+                <div class="chart-card">
+                    <h3>Conversion by Event Type</h3>
+                    <img src="{% static chart_paths.conversion_rates %}" alt="Conversion rate sorted bar chart">
+                </div>
+                {% endif %}
+                {% if chart_paths.quality_vs_reach %}
+                <div class="chart-card">
+                    <h3>Quality vs Reach</h3>
+                    <img src="{% static chart_paths.quality_vs_reach %}" alt="Quality vs reach scatter plot">
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- 3. Performance (ranked event table) -->
+        <section id="performance">
+            <h2>Performance Ranking</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Event Name</th>
+                            <th>Type</th>
+                            <th>Dept</th>
+                            <th>Date</th>
+                            <th>Score</th>
+                            <th>Feedback Tier</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in ranked_events %}
+                        <tr>
+                            <td>#{{ forloop.counter }}</td>
+                            <td><strong>{{ event.name }}</strong></td>
+                            <td>{{ event.event_type }}</td>
+                            <td>{{ event.department }}</td>
+                            <td>{{ event.event_date }}</td>
+                            <td>
+                                {% if event.score != None %}
+                                    <span class="score-badge">{{ event.score|floatformat:1 }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ event.feedback_tier }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">No valid events found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. Insights (headline insight per event) -->
+        <section id="insights">
+            <h2>Key Insights</h2>
+            <div class="insights-grid">
+                {% for event in ranked_events %}
+                    {% if event.headline_insight %}
+                    <div class="insight-card">
+                        <div class="insight-event-name">{{ event.name }}</div>
+                        <span class="insight-tag">{{ event.headline_insight }}</span>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-muted);">
+                            {{ event.department }} | {{ event.event_type }}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <p>No headline insights identified.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- 5. Reliability (visible warning panel) -->
+        {% if warnings %}
+        <section id="reliability">
+            <div class="warning-panel">
+                <h2>⚠️ Data Reliability Warnings</h2>
+                <ul class="warning-list">
+                    {% for warning in warnings %}
+                    <li class="warning-item">
+                        <strong>{{ warning.name }}</strong>: 
+                        {% if not warning.is_valid %}
+                            Data Quality Issue ({{ warning.data_issue }})
+                        {% elif warning.low_reliability_tag %}
+                            Low Reliability ({{ warning.feedback_tier }})
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+        {% endif %}
+
+    </div>
+</body>
+</html>

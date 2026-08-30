@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+venv/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+
+# Static files
+# Note: if you want to commit generated images (charts), you might not want to ignore them.
+# The charts are saved in events/static/events/img/ - let's ignore the generated charts so they don't pollute the repo,
+# as they are generated on the fly. Or keep them? Usually static images generated at runtime should be ignored.
+events/static/events/img/*.png
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
